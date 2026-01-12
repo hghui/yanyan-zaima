@@ -122,6 +122,8 @@
             flex-direction: column;
             opacity: 0;
             transition: opacity 0.5s ease;
+            /* 确保聊天界面内部正确布局 */
+            overflow: hidden;
         }
         
         .header {
@@ -131,6 +133,8 @@
             text-align: center;
             position: relative;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+            z-index: 2;
         }
         
         .header h1 {
@@ -147,6 +151,15 @@
             opacity: 0.9;
         }
         
+        /* 修复消息容器，防止挤压输入框 */
+        .chat-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        
         .messages-container {
             flex: 1;
             padding: 20px;
@@ -155,6 +168,10 @@
             flex-direction: column;
             gap: 15px;
             background-color: var(--background-color);
+            /* 修复滚动行为 */
+            min-height: 0;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
         }
         
         .message {
@@ -165,6 +182,7 @@
             word-wrap: break-word;
             animation: messageAppear 0.3s ease-out;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
         }
         
         .message.system {
@@ -188,6 +206,7 @@
             text-align: right;
         }
         
+        /* 输入框容器始终固定在底部 */
         .input-container {
             padding: 20px;
             border-top: 1px solid var(--border-color);
@@ -195,7 +214,9 @@
             display: flex;
             gap: 10px;
             transition: all 0.3s ease;
-            flex-shrink: 0; /* 防止输入框被压缩 */
+            flex-shrink: 0;
+            z-index: 2;
+            position: relative;
         }
         
         /* 禁言状态下的输入容器 */
@@ -308,6 +329,7 @@
             text-align: center;
             font-size: 0.9rem;
             animation: fadeIn 0.5s;
+            flex-shrink: 0;
         }
         
         .dark-theme .warning {
@@ -325,6 +347,7 @@
             margin: 10px 20px;
             text-align: center;
             animation: shake 0.5s;
+            flex-shrink: 0;
         }
         
         .dark-theme .blocked-notice {
@@ -342,6 +365,7 @@
             margin: 10px 20px;
             text-align: center;
             animation: celebrationPulse 2s infinite;
+            flex-shrink: 0;
         }
         
         .dark-theme .celebration {
@@ -392,6 +416,24 @@
         
         .reset-btn:hover {
             background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* 滚动条样式 */
+        .messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .messages-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .messages-container::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+        
+        .dark-theme .messages-container::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
         }
         
         /* 动画定义 */
@@ -459,6 +501,14 @@
             .title-text {
                 font-size: 3rem;
             }
+            
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .input-container {
+                padding: 15px;
+            }
         }
     </style>
 </head>
@@ -490,8 +540,11 @@
                 </div>
             </div>
             
-            <div id="messages-container" class="messages-container">
-                <!-- 消息将通过JavaScript动态添加 -->
+            <!-- 添加中间内容容器 -->
+            <div class="chat-content">
+                <div id="messages-container" class="messages-container">
+                    <!-- 消息将通过JavaScript动态添加 -->
+                </div>
             </div>
             
             <div class="input-container" id="input-container">
@@ -558,6 +611,10 @@
             // 如果已有消息，显示消息历史
             if (appState.messages.length > 0) {
                 renderMessages();
+                // 确保消息滚动到底部
+                setTimeout(() => {
+                    scrollToBottom();
+                }, 100);
             } else {
                 // 否则添加系统第一条消息
                 addSystemMessage("在吗？");
@@ -576,6 +633,11 @@
             if (!appState.isBlocked) {
                 unblockUser();
             }
+        }
+        
+        // 滚动到底部
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
         
         // 应用主题
@@ -758,6 +820,9 @@
                     }, 500);
                 }
             }, 3000);
+            
+            // 滚动到底部
+            setTimeout(scrollToBottom, 100);
         }
         
         // 显示禁言通知
@@ -769,6 +834,9 @@
             notice.innerHTML = `<i class="fas fa-ban"></i> 您已被禁言，请 ${hoursLeft} 小时后再试`;
             
             messagesContainer.appendChild(notice);
+            
+            // 滚动到底部
+            setTimeout(scrollToBottom, 100);
             
             // 5秒后移除
             setTimeout(() => {
@@ -791,6 +859,9 @@
             celebration.innerHTML = `<i class="fas fa-star"></i> ${message}`;
             
             messagesContainer.appendChild(celebration);
+            
+            // 滚动到底部
+            setTimeout(scrollToBottom, 100);
             
             // 5秒后移除
             setTimeout(() => {
@@ -817,6 +888,9 @@
             appState.messages.push(message);
             renderMessage(message);
             saveState();
+            
+            // 滚动到底部
+            setTimeout(scrollToBottom, 100);
         }
         
         // 添加用户消息
@@ -830,6 +904,9 @@
             appState.messages.push(message);
             renderMessage(message);
             saveState();
+            
+            // 滚动到底部
+            setTimeout(scrollToBottom, 100);
         }
         
         // 渲染消息
@@ -843,8 +920,6 @@
             `;
             
             messagesContainer.appendChild(messageDiv);
-            // 滚动到底部
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
         
         // 渲染所有消息
@@ -1044,6 +1119,13 @@
         window.addEventListener('load', function() {
             autoThemeSwitch();
         });
+        
+        // 确保输入框获得焦点
+        setTimeout(() => {
+            if (!messageInput.disabled) {
+                messageInput.focus();
+            }
+        }, 1000);
     </script>
 </body>
 </html>
