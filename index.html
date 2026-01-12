@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>在吗</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -44,32 +44,36 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
         }
         
         body {
             background-color: var(--background-color);
-            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
             color: var(--text-color);
             transition: background-color 0.3s, color 0.3s;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
         
         .container {
             width: 100%;
-            max-width: 400px;
-            height: 700px;
+            height: 100%;
+            max-width: 500px;
             background-color: var(--background-color);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             position: relative;
             display: flex;
             flex-direction: column;
-            border: 1px solid var(--border-color);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
         }
         
         /* 启动界面样式 */
@@ -88,11 +92,11 @@
         
         .title-container {
             text-align: center;
-            margin-bottom: 80px;
+            margin-bottom: 20vh;
         }
         
         .title-text {
-            font-size: 3.8rem;
+            font-size: clamp(3rem, 10vw, 4.5rem);
             font-weight: 800;
             color: white;
             text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
@@ -104,11 +108,13 @@
         
         .enter-hint {
             color: rgba(255, 255, 255, 0.9);
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 4vw, 1.3rem);
             position: absolute;
-            bottom: 100px;
+            bottom: 15vh;
             opacity: 0;
             animation: pulseHint 2s infinite 2.5s, fadeIn 1s forwards 2.5s;
+            text-align: center;
+            padding: 0 20px;
         }
         
         .enter-hint i {
@@ -122,36 +128,36 @@
             flex-direction: column;
             opacity: 0;
             transition: opacity 0.5s ease;
-            /* 确保聊天界面内部正确布局 */
             overflow: hidden;
         }
         
         .header {
             background-color: var(--header-bg);
             color: white;
-            padding: 20px;
+            padding: 12px 16px;
             text-align: center;
             position: relative;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             flex-shrink: 0;
             z-index: 2;
+            padding-top: max(12px, env(safe-area-inset-top));
         }
         
         .header h1 {
-            font-size: 1.5rem;
+            font-size: clamp(1.1rem, 4vw, 1.4rem);
             font-weight: 600;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            margin-top: env(safe-area-inset-top);
         }
         
         .stats {
             display: flex;
             justify-content: space-between;
-            margin-top: 10px;
-            font-size: 0.85rem;
+            margin-top: 6px;
+            font-size: 0.8rem;
             opacity: 0.9;
         }
         
-        /* 修复消息容器，防止挤压输入框 */
+        /* 聊天内容区域 */
         .chat-content {
             flex: 1;
             display: flex;
@@ -162,27 +168,28 @@
         
         .messages-container {
             flex: 1;
-            padding: 20px;
+            padding: 12px 16px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             background-color: var(--background-color);
-            /* 修复滚动行为 */
             min-height: 0;
             overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
+            padding-bottom: env(safe-area-inset-bottom);
         }
         
         .message {
-            max-width: 80%;
-            padding: 12px 18px;
-            border-radius: 20px;
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 18px;
             line-height: 1.4;
             word-wrap: break-word;
             animation: messageAppear 0.3s ease-out;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             flex-shrink: 0;
+            font-size: clamp(0.95rem, 3.5vw, 1.05rem);
         }
         
         .message.system {
@@ -200,16 +207,15 @@
         }
         
         .message-time {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             opacity: 0.7;
-            margin-top: 5px;
+            margin-top: 4px;
             text-align: right;
         }
         
-        /* 输入框容器始终固定在底部 */
+        /* 输入框容器 */
         .input-container {
-            padding: 20px;
-            border-top: 1px solid var(--border-color);
+            padding: 12px 16px;
             background-color: var(--input-bg);
             display: flex;
             gap: 10px;
@@ -217,6 +223,8 @@
             flex-shrink: 0;
             z-index: 2;
             position: relative;
+            border-top: 1px solid var(--border-color);
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
         }
         
         /* 禁言状态下的输入容器 */
@@ -239,7 +247,6 @@
             z-index: 5;
             padding: 10px;
             text-align: center;
-            border-radius: 0 0 20px 20px;
         }
         
         .dark-theme .blocked-overlay {
@@ -247,32 +254,37 @@
         }
         
         .blocked-overlay i {
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: var(--warning-color);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
         .blocked-overlay p {
             color: var(--warning-color);
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
         }
         
         .blocked-overlay .countdown {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: var(--text-color);
         }
         
         #message-input {
             flex: 1;
-            padding: 12px 18px;
+            padding: 12px 16px;
             border: 2px solid var(--border-color);
-            border-radius: 30px;
-            font-size: 1rem;
+            border-radius: 24px;
+            font-size: clamp(0.95rem, 4vw, 1rem);
             outline: none;
             transition: border-color 0.3s, background-color 0.3s;
             background-color: var(--input-bg);
             color: var(--text-color);
+            min-height: 48px;
+            max-height: 120px;
+            resize: none;
+            line-height: 1.4;
         }
         
         #message-input:focus {
@@ -291,20 +303,22 @@
             color: white;
             border: none;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 10px rgba(74, 107, 255, 0.3);
+            font-size: 1.1rem;
+            box-shadow: 0 3px 8px rgba(74, 107, 255, 0.3);
             transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s, background-color 0.3s;
+            flex-shrink: 0;
+            align-self: flex-end;
         }
         
         #send-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(74, 107, 255, 0.4);
+            box-shadow: 0 5px 10px rgba(74, 107, 255, 0.4);
             background-color: var(--secondary-color);
         }
         
@@ -323,11 +337,11 @@
             background-color: #fff3cd;
             color: #856404;
             border: 1px solid #ffeaa7;
-            padding: 10px 15px;
+            padding: 10px 14px;
             border-radius: 10px;
-            margin: 10px 20px;
+            margin: 8px 16px;
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             animation: fadeIn 0.5s;
             flex-shrink: 0;
         }
@@ -342,12 +356,13 @@
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
-            padding: 15px;
+            padding: 12px 14px;
             border-radius: 10px;
-            margin: 10px 20px;
+            margin: 8px 16px;
             text-align: center;
             animation: shake 0.5s;
             flex-shrink: 0;
+            font-size: 0.85rem;
         }
         
         .dark-theme .blocked-notice {
@@ -360,12 +375,13 @@
             background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
-            padding: 15px;
+            padding: 12px 14px;
             border-radius: 10px;
-            margin: 10px 20px;
+            margin: 8px 16px;
             text-align: center;
             animation: celebrationPulse 2s infinite;
             flex-shrink: 0;
+            font-size: 0.85rem;
         }
         
         .dark-theme .celebration {
@@ -376,20 +392,21 @@
         
         .theme-toggle {
             position: absolute;
-            top: 15px;
+            top: 12px;
             right: 60px;
             background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             transition: background 0.3s;
+            top: max(12px, env(safe-area-inset-top));
         }
         
         .theme-toggle:hover {
@@ -398,20 +415,21 @@
         
         .reset-btn {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 12px;
+            right: 12px;
             background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             transition: background 0.3s;
+            top: max(12px, env(safe-area-inset-top));
         }
         
         .reset-btn:hover {
@@ -420,7 +438,7 @@
         
         /* 滚动条样式 */
         .messages-container::-webkit-scrollbar {
-            width: 6px;
+            width: 5px;
         }
         
         .messages-container::-webkit-scrollbar-track {
@@ -428,7 +446,7 @@
         }
         
         .messages-container::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.2);
+            background-color: rgba(0, 0, 0, 0.15);
             border-radius: 3px;
         }
         
@@ -454,7 +472,7 @@
                 opacity: 0.9;
             }
             50% {
-                transform: translateY(-10px);
+                transform: translateY(-8px);
                 opacity: 1;
             }
         }
@@ -481,8 +499,8 @@
         
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+            20%, 40%, 60%, 80% { transform: translateX(3px); }
         }
         
         @keyframes celebrationPulse {
@@ -490,25 +508,159 @@
             50% { transform: scale(1.02); }
         }
         
-        /* 响应式调整 */
-        @media (max-width: 480px) {
+        /* 移动端特定优化 */
+        @media (max-width: 768px) {
             .container {
-                height: 100vh;
                 border-radius: 0;
                 max-width: 100%;
             }
             
-            .title-text {
-                font-size: 3rem;
+            .header {
+                padding-left: max(16px, env(safe-area-inset-left));
+                padding-right: max(16px, env(safe-area-inset-right));
             }
             
-            .header {
-                padding: 15px 20px;
+            .messages-container {
+                padding-left: max(16px, env(safe-area-inset-left));
+                padding-right: max(16px, env(safe-area-inset-right));
             }
             
             .input-container {
-                padding: 15px;
+                padding-left: max(16px, env(safe-area-inset-left));
+                padding-right: max(16px, env(safe-area-inset-right));
             }
+            
+            .message {
+                max-width: 88%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .title-text {
+                font-size: clamp(2.8rem, 12vw, 3.5rem);
+            }
+            
+            .enter-hint {
+                bottom: 12vh;
+            }
+            
+            .header {
+                padding: 10px 14px;
+                padding-top: max(10px, env(safe-area-inset-top));
+            }
+            
+            .header h1 {
+                font-size: 1.1rem;
+            }
+            
+            .messages-container {
+                padding: 10px 14px;
+                gap: 10px;
+            }
+            
+            .message {
+                padding: 9px 12px;
+                border-radius: 16px;
+                font-size: 0.95rem;
+            }
+            
+            .input-container {
+                padding: 10px 14px;
+                padding-bottom: max(10px, env(safe-area-inset-bottom));
+            }
+            
+            #message-input {
+                padding: 10px 14px;
+                min-height: 44px;
+            }
+            
+            #send-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 1rem;
+            }
+            
+            .theme-toggle, .reset-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+            
+            .theme-toggle {
+                right: 56px;
+            }
+        }
+        
+        /* 横屏模式优化 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .header {
+                padding: 8px 16px;
+                padding-top: max(8px, env(safe-area-inset-top));
+            }
+            
+            .header h1 {
+                font-size: 1rem;
+            }
+            
+            .stats {
+                font-size: 0.75rem;
+                margin-top: 4px;
+            }
+            
+            .messages-container {
+                padding: 8px 16px;
+                gap: 8px;
+            }
+            
+            .message {
+                padding: 8px 12px;
+                border-radius: 14px;
+                font-size: 0.9rem;
+            }
+            
+            .input-container {
+                padding: 8px 16px;
+                padding-bottom: max(8px, env(safe-area-inset-bottom));
+            }
+            
+            #message-input {
+                padding: 8px 12px;
+                min-height: 40px;
+                font-size: 0.9rem;
+            }
+            
+            #send-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 0.95rem;
+            }
+        }
+        
+        /* 防止iOS Safari弹性滚动 */
+        .messages-container {
+            -webkit-overflow-scrolling: touch;
+            overflow-anchor: none;
+        }
+        
+        /* 键盘弹出时的优化 */
+        .keyboard-open .messages-container {
+            padding-bottom: 0;
+        }
+        
+        /* 长按菜单优化 */
+        .message.user, .message.system {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        /* 禁用文本选择 */
+        .message.user:active, .message.system:active {
+            opacity: 0.8;
+        }
+        
+        /* 防止iOS双击缩放 */
+        input, button, textarea {
+            touch-action: manipulation;
         }
     </style>
 </head>
@@ -540,13 +692,14 @@
                 </div>
             </div>
             
-            <!-- 添加中间内容容器 -->
+            <!-- 中间内容容器 -->
             <div class="chat-content">
                 <div id="messages-container" class="messages-container">
                     <!-- 消息将通过JavaScript动态添加 -->
                 </div>
             </div>
             
+            <!-- 输入框容器 -->
             <div class="input-container" id="input-container">
                 <input type="text" id="message-input" placeholder="输入消息..." autocomplete="off">
                 <button id="send-btn">
@@ -613,7 +766,7 @@
                 renderMessages();
                 // 确保消息滚动到底部
                 setTimeout(() => {
-                    scrollToBottom();
+                    scrollToBottom(true);
                 }, 100);
             } else {
                 // 否则添加系统第一条消息
@@ -633,11 +786,25 @@
             if (!appState.isBlocked) {
                 unblockUser();
             }
+            
+            // 添加移动端触摸优化
+            setupTouchOptimizations();
+            
+            // 监听键盘事件
+            setupKeyboardListeners();
         }
         
         // 滚动到底部
-        function scrollToBottom() {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        function scrollToBottom(instant = false) {
+            if (instant) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } else {
+                // 平滑滚动
+                messagesContainer.scrollTo({
+                    top: messagesContainer.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
         }
         
         // 应用主题
@@ -706,6 +873,9 @@
             
             // 保存状态
             saveState();
+            
+            // 隐藏键盘
+            messageInput.blur();
         }
         
         // 解除禁言
@@ -808,6 +978,11 @@
             warning.textContent = message;
             messagesContainer.appendChild(warning);
             
+            // 滚动到底部
+            setTimeout(() => {
+                scrollToBottom();
+            }, 50);
+            
             // 3秒后移除警告
             setTimeout(() => {
                 if (warning.parentNode) {
@@ -820,9 +995,6 @@
                     }, 500);
                 }
             }, 3000);
-            
-            // 滚动到底部
-            setTimeout(scrollToBottom, 100);
         }
         
         // 显示禁言通知
@@ -836,7 +1008,9 @@
             messagesContainer.appendChild(notice);
             
             // 滚动到底部
-            setTimeout(scrollToBottom, 100);
+            setTimeout(() => {
+                scrollToBottom();
+            }, 50);
             
             // 5秒后移除
             setTimeout(() => {
@@ -861,7 +1035,9 @@
             messagesContainer.appendChild(celebration);
             
             // 滚动到底部
-            setTimeout(scrollToBottom, 100);
+            setTimeout(() => {
+                scrollToBottom();
+            }, 50);
             
             // 5秒后移除
             setTimeout(() => {
@@ -890,7 +1066,9 @@
             saveState();
             
             // 滚动到底部
-            setTimeout(scrollToBottom, 100);
+            setTimeout(() => {
+                scrollToBottom();
+            }, 100);
         }
         
         // 添加用户消息
@@ -906,7 +1084,9 @@
             saveState();
             
             // 滚动到底部
-            setTimeout(scrollToBottom, 100);
+            setTimeout(() => {
+                scrollToBottom();
+            }, 100);
         }
         
         // 渲染消息
@@ -920,6 +1100,13 @@
             `;
             
             messagesContainer.appendChild(messageDiv);
+            
+            // 防止消息过多导致性能问题
+            if (appState.messages.length > 100) {
+                // 保留最近50条消息
+                appState.messages = appState.messages.slice(-50);
+                renderMessages();
+            }
         }
         
         // 渲染所有消息
@@ -1064,6 +1251,54 @@
             saveState();
         }
         
+        // 设置移动端触摸优化
+        function setupTouchOptimizations() {
+            // 防止双击缩放
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+            
+            // 优化消息触摸反馈
+            const messages = document.querySelectorAll('.message');
+            messages.forEach(msg => {
+                msg.addEventListener('touchstart', function() {
+                    this.style.opacity = '0.8';
+                });
+                msg.addEventListener('touchend', function() {
+                    this.style.opacity = '1';
+                });
+            });
+        }
+        
+        // 设置键盘监听
+        function setupKeyboardListeners() {
+            // 检测键盘弹出/收起
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            
+            if (isIOS) {
+                // iOS键盘处理
+                let originalHeight = window.innerHeight;
+                
+                window.addEventListener('resize', function() {
+                    if (window.innerHeight < originalHeight) {
+                        // 键盘弹出
+                        document.body.classList.add('keyboard-open');
+                        setTimeout(() => {
+                            scrollToBottom();
+                        }, 300);
+                    } else {
+                        // 键盘收起
+                        document.body.classList.remove('keyboard-open');
+                    }
+                });
+            }
+        }
+        
         // 事件监听
         splashScreen.addEventListener('click', function() {
             // 淡出启动界面
@@ -1079,12 +1314,21 @@
             }, 800);
         });
         
+        // 点击发送按钮
         sendBtn.addEventListener('click', handleSendMessage);
         
+        // 输入框回车发送
         messageInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !sendBtn.disabled) {
                 handleSendMessage();
             }
+        });
+        
+        // 输入框获得焦点时滚动到底部
+        messageInput.addEventListener('focus', function() {
+            setTimeout(() => {
+                scrollToBottom();
+            }, 300);
         });
         
         resetBtn.addEventListener('click', resetApp);
