@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在吗</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6bff;
+            --secondary-color: #6c8aff;
+            --light-color: #f0f2ff;
+            --text-color: #333;
+            --border-color: #e0e0e0;
+            --warning-color: #ff6b6b;
+            --success-color: #4cd964;
+            --background-color: #ffffff;
+            --message-user-bg: #4a6bff;
+            --message-system-bg: #f0f2ff;
+            --message-user-text: #ffffff;
+            --message-system-text: #333;
+            --header-bg: #4a6bff;
+            --input-bg: #ffffff;
+        }
+        
+        .dark-theme {
+            --primary-color: #6c8aff;
+            --secondary-color: #4a6bff;
+            --light-color: #2a2a3c;
+            --text-color: #e0e0e0;
+            --border-color: #444455;
+            --warning-color: #ff8585;
+            --success-color: #5de375;
+            --background-color: #1a1a2e;
+            --message-user-bg: #4a6bff;
+            --message-system-bg: #2a2a3c;
+            --message-user-text: #ffffff;
+            --message-system-text: #e0e0e0;
+            --header-bg: #2a2a3c;
+            --input-bg: #2a2a3c;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: var(--background-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 400px;
+            height: 700px;
+            background-color: var(--background-color);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+        }
+        
+        /* 启动界面样式 */
+        #splash-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #4a6bff, #6c8aff, #8aa3ff);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            transition: opacity 0.8s ease;
+        }
+        
+        .title-container {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+        
+        .title-text {
+            font-size: 3.8rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            letter-spacing: 2px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: textReveal 2s forwards 0.5s;
+        }
+        
+        .enter-hint {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            position: absolute;
+            bottom: 100px;
+            opacity: 0;
+            animation: pulseHint 2s infinite 2.5s, fadeIn 1s forwards 2.5s;
+        }
+        
+        .enter-hint i {
+            margin-right: 8px;
+        }
+        
+        /* 聊天界面样式 */
+        #chat-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .header {
+            background-color: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: var(--background-color);
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            animation: messageAppear 0.3s ease-out;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .message.system {
+            background-color: var(--message-system-bg);
+            color: var(--message-system-text);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message.user {
+            background-color: var(--message-user-bg);
+            color: var(--message-user-text);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .input-container {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            display: flex;
+            gap: 10px;
+            transition: all 0.3s ease;
+            flex-shrink: 0; /* 防止输入框被压缩 */
+        }
+        
+        /* 禁言状态下的输入容器 */
+        .input-container.blocked {
+            background-color: var(--light-color);
+            position: relative;
+        }
+        
+        .blocked-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(248, 249, 250, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+            padding: 10px;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .dark-theme .blocked-overlay {
+            background-color: rgba(42, 42, 60, 0.95);
+        }
+        
+        .blocked-overlay i {
+            font-size: 2rem;
+            color: var(--warning-color);
+            margin-bottom: 10px;
+        }
+        
+        .blocked-overlay p {
+            color: var(--warning-color);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .blocked-overlay .countdown {
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+        
+        #message-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 30px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s, background-color 0.3s;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+        
+        #message-input:focus {
+            border-color: var(--primary-color);
+        }
+        
+        #message-input:disabled {
+            background-color: var(--light-color);
+            color: var(--text-color);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        #send-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(74, 107, 255, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s, background-color 0.3s;
+        }
+        
+        #send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(74, 107, 255, 0.4);
+            background-color: var(--secondary-color);
+        }
+        
+        #send-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        #send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: var(--border-color);
+        }
+        
+        /* 提示和警告样式 */
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin: 10px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            animation: fadeIn 0.5s;
+        }
+        
+        .dark-theme .warning {
+            background-color: #3a3a2a;
+            color: #ffeaa7;
+            border-color: #555544;
+        }
+        
+        .blocked-notice {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 20px;
+            text-align: center;
+            animation: shake 0.5s;
+        }
+        
+        .dark-theme .blocked-notice {
+            background-color: #3a2a2a;
+            color: #f5c6cb;
+            border-color: #554444;
+        }
+        
+        .celebration {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 20px;
+            text-align: center;
+            animation: celebrationPulse 2s infinite;
+        }
+        
+        .dark-theme .celebration {
+            background-color: #2a3a2a;
+            color: #c3e6cb;
+            border-color: #445544;
+        }
+        
+        .theme-toggle {
+            position: absolute;
+            top: 15px;
+            right: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            transition: background 0.3s;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .reset-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            transition: background 0.3s;
+        }
+        
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* 动画定义 */
+        @keyframes textReveal {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulseHint {
+            0%, 100% {
+                transform: translateY(0);
+                opacity: 0.9;
+            }
+            50% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes messageAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        @keyframes celebrationPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .container {
+                height: 100vh;
+                border-radius: 0;
+                max-width: 100%;
+            }
+            
+            .title-text {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 启动界面 -->
+        <div id="splash-screen">
+            <div class="title-container">
+                <div class="title-text">在吗？</div>
+            </div>
+            <div class="enter-hint">
+                <i class="fas fa-hand-point-up"></i>点击进入
+            </div>
+        </div>
+        
+        <!-- 聊天界面 -->
+        <div id="chat-screen">
+            <div class="header">
+                <button class="theme-toggle" id="theme-toggle" title="切换主题">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="reset-btn" id="reset-btn" title="重置应用">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <h1>在吗？模拟聊天</h1>
+                <div class="stats">
+                    <span id="day-count">第 <span id="current-day">1</span> 天</span>
+                    <span id="consecutive-days">连续 <span id="consecutive-count">0</span> 天</span>
+                </div>
+            </div>
+            
+            <div id="messages-container" class="messages-container">
+                <!-- 消息将通过JavaScript动态添加 -->
+            </div>
+            
+            <div class="input-container" id="input-container">
+                <input type="text" id="message-input" placeholder="输入消息..." autocomplete="off">
+                <button id="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                <!-- 禁言覆盖层 -->
+                <div class="blocked-overlay" id="blocked-overlay" style="display: none;">
+                    <i class="fas fa-ban"></i>
+                    <p>您已被禁言</p>
+                    <div class="countdown" id="countdown">请明天再来</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 应用状态
+        const appState = {
+            // 从localStorage加载状态或使用默认值
+            currentDay: parseInt(localStorage.getItem('currentDay')) || 1,
+            consecutiveDays: parseInt(localStorage.getItem('consecutiveDays')) || 0,
+            totalDays: parseInt(localStorage.getItem('totalDays')) || 1,
+            isBlocked: localStorage.getItem('isBlocked') === 'true' || false,
+            blockedUntil: localStorage.getItem('blockedUntil') || null,
+            lastChatDate: localStorage.getItem('lastChatDate') || null,
+            repliedToday: localStorage.getItem('repliedToday') === 'true' || false,
+            unlockedFestival: parseInt(localStorage.getItem('unlockedFestival')) || 0,
+            messages: JSON.parse(localStorage.getItem('messages')) || [],
+            // 新增：是否已回复"我知道"状态
+            hasRepliedIKnow: localStorage.getItem('hasRepliedIKnow') === 'true' || false,
+            // 主题设置
+            darkMode: localStorage.getItem('darkMode') === 'true' || false
+        };
+        
+        // DOM元素
+        const splashScreen = document.getElementById('splash-screen');
+        const chatScreen = document.getElementById('chat-screen');
+        const messagesContainer = document.getElementById('messages-container');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const inputContainer = document.getElementById('input-container');
+        const blockedOverlay = document.getElementById('blocked-overlay');
+        const countdownElement = document.getElementById('countdown');
+        const resetBtn = document.getElementById('reset-btn');
+        const themeToggle = document.getElementById('theme-toggle');
+        const dayCount = document.getElementById('current-day');
+        const consecutiveCount = document.getElementById('consecutive-count');
+        const body = document.body;
+        
+        // 初始化应用
+        function initApp() {
+            // 应用主题
+            applyTheme();
+            
+            // 更新显示的天数
+            dayCount.textContent = appState.currentDay;
+            consecutiveCount.textContent = appState.consecutiveDays;
+            
+            // 检查是否被禁言
+            checkBlockStatus();
+            
+            // 如果已有消息，显示消息历史
+            if (appState.messages.length > 0) {
+                renderMessages();
+            } else {
+                // 否则添加系统第一条消息
+                addSystemMessage("在吗？");
+            }
+            
+            // 检查是否需要显示节日祝福
+            checkFestival();
+            
+            // 保存状态
+            saveState();
+            
+            // 更新禁言倒计时显示
+            updateBlockedCountdown();
+            
+            // 确保输入框可用（除非被禁言）
+            if (!appState.isBlocked) {
+                unblockUser();
+            }
+        }
+        
+        // 应用主题
+        function applyTheme() {
+            if (appState.darkMode) {
+                body.classList.add('dark-theme');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                themeToggle.title = "切换到浅色主题";
+            } else {
+                body.classList.remove('dark-theme');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                themeToggle.title = "切换到深色主题";
+            }
+        }
+        
+        // 检查是否被禁言
+        function checkBlockStatus() {
+            if (!appState.isBlocked) {
+                // 解除禁言状态
+                unblockUser();
+                return;
+            }
+            
+            const now = new Date();
+            const blockedUntil = new Date(appState.blockedUntil);
+            
+            // 如果禁言时间已过，解除禁言
+            if (now > blockedUntil) {
+                appState.isBlocked = false;
+                appState.blockedUntil = null;
+                appState.repliedToday = false;
+                appState.hasRepliedIKnow = false;
+                // 重置连续天数
+                appState.consecutiveDays = 0;
+                saveState();
+                showWarning("禁言已解除，您可以重新开始对话。");
+                unblockUser();
+            } else {
+                // 显示禁言提示
+                blockUser();
+            }
+        }
+        
+        // 禁言用户
+        function blockUser() {
+            appState.isBlocked = true;
+            appState.consecutiveDays = 0;
+            consecutiveCount.textContent = "0";
+            
+            // 设置禁言直到明天
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            
+            appState.blockedUntil = tomorrow;
+            
+            // 更新UI显示禁言状态
+            inputContainer.classList.add('blocked');
+            blockedOverlay.style.display = 'flex';
+            messageInput.disabled = true;
+            messageInput.placeholder = "您已被禁言，请明天再试";
+            sendBtn.disabled = true;
+            
+            // 显示禁言通知
+            showBlockedNotice(tomorrow);
+            
+            // 保存状态
+            saveState();
+        }
+        
+        // 解除禁言
+        function unblockUser() {
+            inputContainer.classList.remove('blocked');
+            blockedOverlay.style.display = 'none';
+            messageInput.disabled = false;
+            messageInput.placeholder = "输入消息...";
+            sendBtn.disabled = false;
+            
+            // 如果今天已回复"我知道"，输入框仍然可用，但再次发送会触发拉黑
+            if (appState.hasRepliedIKnow) {
+                messageInput.placeholder = "……";
+            }
+        }
+        
+        // 更新禁言倒计时
+        function updateBlockedCountdown() {
+            if (!appState.isBlocked) return;
+            
+            const now = new Date();
+            const blockedUntil = new Date(appState.blockedUntil);
+            const timeLeft = blockedUntil - now;
+            
+            if (timeLeft <= 0) {
+                countdownElement.textContent = "禁言已解除";
+                return;
+            }
+            
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (hours > 0) {
+                countdownElement.textContent = `剩余 ${hours} 小时 ${minutes} 分钟`;
+            } else {
+                countdownElement.textContent = `剩余 ${minutes} 分钟`;
+            }
+        }
+        
+        // 检查节日祝福
+        function checkFestival() {
+            // 70天解锁节日彩蛋
+            if (appState.totalDays >= 70 && appState.unlockedFestival < 1) {
+                appState.unlockedFestival = 1;
+                showCelebration("节日彩蛋已解锁！请自行发掘～");
+            }
+            
+            // 140天解锁节日祝福
+            if (appState.totalDays >= 140 && appState.unlockedFestival < 2) {
+                appState.unlockedFestival = 2;
+                showCelebration("节日祝福已解锁！请自行发掘～");
+                // 模拟节日祝福
+                if (isFestivalToday()) {
+                    addSystemMessage(getFestivalGreeting());
+                }
+            }
+            
+            // 如果是节日且已解锁功能，显示节日祝福
+            if (appState.unlockedFestival >= 2 && isFestivalToday()) {
+                showCelebration(getFestivalGreeting());
+            }
+        }
+        
+        // 判断今天是否是节日
+        function isFestivalToday() {
+            const today = new Date();
+            const month = today.getMonth() + 1;
+            const date = today.getDate();
+            
+            // 模拟一些节日
+            // 1月1日元旦，2月14日情人节，10月1日国庆节，12月25日圣诞节
+            const festivals = [
+                {month: 1, date: 1, name: "元旦"},
+                {month: 2, date: 14, name: "情人节"},
+                {month: 10, date: 1, name: "国庆节"},
+                {month: 12, date: 25, name: "圣诞节"}
+            ];
+            
+            return festivals.some(festival => festival.month === month && festival.date === date);
+        }
+        
+        // 获取节日祝福语
+        function getFestivalGreeting() {
+            const today = new Date();
+            const month = today.getMonth() + 1;
+            const date = today.getDate();
+            
+            if (month === 1 && date === 1) return "新年快乐！别感冒！";
+            if (month === 2 && date === 14) return "情人节快乐！一胎8娃！";
+            if (month === 10 && date === 1) return "国庆节快乐！祝福祖国繁荣昌盛！";
+            if (month === 12 && date === 25) return "圣诞节快乐！记得放一双干净的袜子！";
+            
+            return "节日快乐！";
+        }
+        
+        // 显示警告信息
+        function showWarning(message) {
+            const warning = document.createElement('div');
+            warning.className = 'warning';
+            warning.textContent = message;
+            messagesContainer.appendChild(warning);
+            
+            // 3秒后移除警告
+            setTimeout(() => {
+                if (warning.parentNode) {
+                    warning.style.opacity = '0';
+                    warning.style.transition = 'opacity 0.5s';
+                    setTimeout(() => {
+                        if (warning.parentNode) {
+                            warning.parentNode.removeChild(warning);
+                        }
+                    }, 500);
+                }
+            }, 3000);
+        }
+        
+        // 显示禁言通知
+        function showBlockedNotice(blockedUntil) {
+            const notice = document.createElement('div');
+            notice.className = 'blocked-notice';
+            
+            const hoursLeft = Math.ceil((blockedUntil - new Date()) / (1000 * 60 * 60));
+            notice.innerHTML = `<i class="fas fa-ban"></i> 您已被禁言，请 ${hoursLeft} 小时后再试`;
+            
+            messagesContainer.appendChild(notice);
+            
+            // 5秒后移除
+            setTimeout(() => {
+                if (notice.parentNode) {
+                    notice.style.opacity = '0';
+                    notice.style.transition = 'opacity 0.5s';
+                    setTimeout(() => {
+                        if (notice.parentNode) {
+                            notice.parentNode.removeChild(notice);
+                        }
+                    }, 500);
+                }
+            }, 5000);
+        }
+        
+        // 显示庆祝消息
+        function showCelebration(message) {
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.innerHTML = `<i class="fas fa-star"></i> ${message}`;
+            
+            messagesContainer.appendChild(celebration);
+            
+            // 5秒后移除
+            setTimeout(() => {
+                if (celebration.parentNode) {
+                    celebration.style.opacity = '0';
+                    celebration.style.transition = 'opacity 0.5s';
+                    setTimeout(() => {
+                        if (celebration.parentNode) {
+                            celebration.parentNode.removeChild(celebration);
+                        }
+                    }, 500);
+                }
+            }, 5000);
+        }
+        
+        // 添加系统消息
+        function addSystemMessage(text) {
+            const message = {
+                type: 'system',
+                text: text,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            };
+            
+            appState.messages.push(message);
+            renderMessage(message);
+            saveState();
+        }
+        
+        // 添加用户消息
+        function addUserMessage(text) {
+            const message = {
+                type: 'user',
+                text: text,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            };
+            
+            appState.messages.push(message);
+            renderMessage(message);
+            saveState();
+        }
+        
+        // 渲染消息
+        function renderMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.type}`;
+            
+            messageDiv.innerHTML = `
+                <div>${message.text}</div>
+                <div class="message-time">${message.time}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            // 滚动到底部
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // 渲染所有消息
+        function renderMessages() {
+            messagesContainer.innerHTML = '';
+            appState.messages.forEach(message => renderMessage(message));
+        }
+        
+        // 处理用户发送消息
+        function handleSendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+            
+            // 添加用户消息
+            addUserMessage(text);
+            
+            // 清空输入框
+            messageInput.value = '';
+            
+            // 处理系统回复
+            setTimeout(() => {
+                processResponse(text);
+            }, 500);
+        }
+        
+        // 处理系统回复
+        function processResponse(userText) {
+            // 检查是否被禁言
+            if (appState.isBlocked) {
+                showBlockedNotice(new Date(appState.blockedUntil));
+                return;
+            }
+            
+            // 检查今天是否已经回复过"我知道"
+            if (appState.hasRepliedIKnow) {
+                // 如果已经回复过"我知道"，再次发送消息则触发特殊回复并拉黑
+                addSystemMessage("怎么一直发啊？烦不烦啊？");
+                blockUser();
+                return;
+            }
+            
+            // 处理用户消息
+            if (userText === "不在") {
+                // 如果回复"不在"，禁言一天
+                blockUser();
+                addSystemMessage("？");
+            } else if (userText === "在") {
+                // 如果回复"在"
+                const today = new Date().toDateString();
+                
+                // 检查是否是连续对话
+                if (appState.lastChatDate === today) {
+                    // 同一天内重复回复"在"，不增加天数
+                    addSystemMessage("我知道");
+                    appState.hasRepliedIKnow = true;
+                } else {
+                    // 新的一天，增加连续天数
+                    appState.consecutiveDays++;
+                    appState.totalDays++;
+                    appState.currentDay = appState.totalDays;
+                    
+                    // 更新显示
+                    dayCount.textContent = appState.currentDay;
+                    consecutiveCount.textContent = appState.consecutiveDays;
+                    
+                    // 记录最后聊天日期
+                    appState.lastChatDate = today;
+                    
+                    // 标记今天已回复"我知道"
+                    appState.repliedToday = true;
+                    appState.hasRepliedIKnow = true;
+                    
+                    addSystemMessage("我知道");
+                    
+                    // 检查是否达到连续7天
+                    if (appState.consecutiveDays === 7) {
+                        showCelebration("恭喜！您已连续对话7天！");
+                    }
+                    
+                    // 检查节日彩蛋
+                    checkFestival();
+                    
+                    // 不禁用输入框，但设置提示
+                    messageInput.placeholder = "……";
+                }
+            } else {
+                // 其他回复，检查是否是节日祝福
+                if (appState.unlockedFestival >= 1 && isFestivalToday() && isFestivalGreeting(userText)) {
+                    // 节日祝福回复
+                    addSystemMessage(getFestivalResponse(userText));
+                } else {
+                    // 普通回复
+                    addSystemMessage("在吗？");
+                }
+            }
+            
+            saveState();
+        }
+        
+        // 检查是否是节日祝福语
+        function isFestivalGreeting(text) {
+            const greetings = ["新年快乐", "圣诞快乐", "国庆快乐", "节日快乐", "情人节快乐"];
+            return greetings.some(greeting => text.includes(greeting));
+        }
+        
+        // 获取节日祝福回复
+        function getFestivalResponse(greeting) {
+            if (greeting.includes("新年")) return "新年快乐！别感冒！";
+            if (greeting.includes("圣诞")) return "圣诞快乐！记得放一双干净的袜子！";
+            if (greeting.includes("国庆")) return "国庆快乐！祝福祖国繁荣昌盛！";
+            if (greeting.includes("情人")) return "情人节快乐！一胎8娃！";
+            return "节日快乐！";
+        }
+        
+        // 保存状态到localStorage
+        function saveState() {
+            localStorage.setItem('currentDay', appState.currentDay);
+            localStorage.setItem('consecutiveDays', appState.consecutiveDays);
+            localStorage.setItem('totalDays', appState.totalDays);
+            localStorage.setItem('isBlocked', appState.isBlocked);
+            localStorage.setItem('blockedUntil', appState.blockedUntil);
+            localStorage.setItem('lastChatDate', appState.lastChatDate);
+            localStorage.setItem('repliedToday', appState.repliedToday);
+            localStorage.setItem('unlockedFestival', appState.unlockedFestival);
+            localStorage.setItem('messages', JSON.stringify(appState.messages));
+            localStorage.setItem('hasRepliedIKnow', appState.hasRepliedIKnow);
+            localStorage.setItem('darkMode', appState.darkMode);
+        }
+        
+        // 重置应用
+        function resetApp() {
+            if (confirm("确定要重置应用吗？所有进度将丢失。")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+        
+        // 切换主题
+        function toggleTheme() {
+            appState.darkMode = !appState.darkMode;
+            applyTheme();
+            saveState();
+        }
+        
+        // 事件监听
+        splashScreen.addEventListener('click', function() {
+            // 淡出启动界面
+            splashScreen.style.opacity = '0';
+            
+            // 延迟显示聊天界面
+            setTimeout(() => {
+                splashScreen.style.display = 'none';
+                chatScreen.style.opacity = '1';
+                
+                // 初始化应用
+                initApp();
+            }, 800);
+        });
+        
+        sendBtn.addEventListener('click', handleSendMessage);
+        
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !sendBtn.disabled) {
+                handleSendMessage();
+            }
+        });
+        
+        resetBtn.addEventListener('click', resetApp);
+        
+        themeToggle.addEventListener('click', toggleTheme);
+        
+        // 每30秒更新一次禁言倒计时
+        setInterval(updateBlockedCountdown, 30000);
+        
+        // 根据时间自动切换主题（晚上18点到早上6点为深色主题）
+        function autoThemeSwitch() {
+            const hour = new Date().getHours();
+            const isNight = hour >= 18 || hour < 6;
+            
+            if (isNight && !appState.darkMode) {
+                appState.darkMode = true;
+                applyTheme();
+                saveState();
+            } else if (!isNight && appState.darkMode) {
+                appState.darkMode = false;
+                applyTheme();
+                saveState();
+            }
+        }
+        
+        // 初始动画
+        setTimeout(() => {
+            document.querySelector('.title-text').style.animation = 'textReveal 2s forwards 0.5s';
+        }, 100);
+        
+        // 页面加载时自动检测主题
+        window.addEventListener('load', function() {
+            autoThemeSwitch();
+        });
+    </script>
+</body>
+</html>
